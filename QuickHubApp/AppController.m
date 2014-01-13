@@ -29,6 +29,7 @@
 #import "GithubOAuthClient.h"
 #import "Reachability.h"
 #import "Preferences.h"
+#import "QuickHubAppAppDelegate.h"
 
 @interface AppController (Private)
 - (void) updateGistUI:(NSDictionary *) dictionary;
@@ -268,7 +269,17 @@
         NSDictionary *dictionary = [githubController loadPulls:nil];
         if (dictionary) {
             //[self performSelectorOnMainThread:@selector(updatePullsUI:) withObject:dictionary waitUntilDone:NO];
-            [menuController pullsFinished:dictionary];  
+            [menuController pullsFinished:dictionary];
+            NSUInteger PRCount = 0;
+            for (NSString *repo in dictionary) {
+                PRCount += [dictionary[repo] count];
+            }
+            if (PRCount > 0) {
+                [(QuickHubAppAppDelegate *)[[NSApplication sharedApplication] delegate] setStatusItemText:[NSString stringWithFormat:@"❎ %lu",PRCount]];
+            } else {
+                [(QuickHubAppAppDelegate *)[[NSApplication sharedApplication] delegate] setStatusItemText:@"✅"];
+            }
+            
         }
     }  
 }

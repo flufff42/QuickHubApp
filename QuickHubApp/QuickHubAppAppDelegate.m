@@ -596,4 +596,8 @@
     }
 }
 
+- (void)setStatusItemText:(NSString *)string {
+    [statusItem setTitle:string];
+}
+
 @end

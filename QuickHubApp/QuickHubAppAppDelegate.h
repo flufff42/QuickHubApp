@@ -97,5 +97,5 @@
 
 - (void)gistFileContentService:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error;
 - (void)gistTextSelectionService:(NSPasteboard *)pboard userData:(NSString *)userData error:(NSString **)error;
-
+- (void)setStatusItemText:(NSString *)string;
 @end

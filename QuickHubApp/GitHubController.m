@@ -247,7 +247,7 @@
     NSString *username = [preferences login];
     NSString *password = [preferences password];
     
-    ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:[NSURL URLWithString:@"https://api.github.com/user/watched?per_page=100"]];
+    ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:[NSURL URLWithString:@"https://api.github.com/user/subscriptions?per_page=100"]];
     [request addRequestHeader:@"Authorization" value:[NSString stringWithFormat:@"Basic %@", [[[NSString stringWithFormat:@"%@:%@", username, password] dataUsingEncoding:NSUTF8StringEncoding] base64EncodedString]]];
     [request setDidFinishSelector:@selector(watchedReposFinished:)];
     [request setDidFailSelector:@selector(httpFailed:)];

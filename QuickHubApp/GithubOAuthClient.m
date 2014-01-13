@@ -173,7 +173,18 @@
         if (pulls != nil && [pulls valueForKey:@"url"]) {
             [dict setValue:pulls forKey:repoName];
         }
-    }    
+    }
+    
+    for (id organization in [self loadOrganizations:nil]) {
+        NSDictionary *organizationRepos = [self getReposForOrganization:organization[@"login"]];
+        for (id orgRepo in organizationRepos) {
+            NSString *repoName = orgRepo[@"full_name"];
+            NSDictionary *pulls = [self getPullsForOrganizationRepository:repoName];
+            if (pulls != nil && [pulls valueForKey:@"url"]) {
+                [dict setValue:pulls forKey:repoName];
+            }
+        }
+    }
     return dict;   
 }
 
@@ -203,6 +214,26 @@
     
     NSString *url = [NSString stringWithFormat:@"%@&per_page=100", [self getOAuthURL:[NSString stringWithFormat:@"repos/%@/%@/pulls", userName, name]]];
 
+    ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:[NSURL URLWithString:url]];
+    [request setCachePolicy:ASIAskServerIfModifiedCachePolicy | ASIFallbackToCacheIfLoadFailsCachePolicy];
+    [request setCacheStoragePolicy:ASICachePermanentlyCacheStoragePolicy];
+    
+    [request startSynchronous];
+    [self updateRemaining:request];
+    int status = [request responseStatusCode];
+    NSString *response = [[request responseString]stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    // an empty response is a JSON string like '[]' (without quotes)...
+    if (status == 200 && [response length] > 2) {
+        return [[request responseString] objectFromJSONString];
+    }
+    return nil;
+}
+
+- (NSDictionary *)getPullsForOrganizationRepository:(NSString *)name {
+    //NSLog(@"Get pulls for repository %@", name);
+    
+    NSString *url = [NSString stringWithFormat:@"%@&per_page=100", [self getOAuthURL:[NSString stringWithFormat:@"repos/%@/pulls", name]]];
+    
     ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:[NSURL URLWithString:url]];
     [request setCachePolicy:ASIAskServerIfModifiedCachePolicy | ASIFallbackToCacheIfLoadFailsCachePolicy];
     [request setCacheStoragePolicy:ASICachePermanentlyCacheStoragePolicy];
@@ -248,7 +279,7 @@
 }
 
 - (NSDictionary *) loadWatchedRepos:(id) sender {
-    NSString *url = [NSString stringWithFormat:@"%@&per_page=100", [self getOAuthURL:@"user/watched"]];
+    NSString *url = [NSString stringWithFormat:@"%@&per_page=100", [self getOAuthURL:@"user/subscriptions"]];
     ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:[NSURL URLWithString:url]];
     [request setCachePolicy:ASIAskServerIfModifiedCachePolicy | ASIFallbackToCacheIfLoadFailsCachePolicy];
     [request setCacheStoragePolicy:ASICachePermanentlyCacheStoragePolicy];
